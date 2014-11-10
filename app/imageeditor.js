@@ -9,7 +9,7 @@ var ImageEditor = function (canvasId){
     this.iw = 0;
     this.ih = 0;
     
-    this.anchors = {};  // holds four corners
+    this.anchors = [];  // holds four corners: tl, tr, bl, br
     
     this.ctx = this.canvas.getContext('2d');
     this.mouse = utils.captureMouse(this.canvas);
@@ -83,7 +83,7 @@ ImageEditor.prototype.render = function(){
            
        }
        me.selector.render(ctx);
-       me.makeResizable();
+       me.drawAnchors();
     };
     
     img.src = this.imgSrc;
@@ -100,24 +100,43 @@ ImageEditor.prototype.crop = function(targetId){
 };
 
 ImageEditor.prototype.makeResizable = function(){
-    var ctx = this.ctx;
-    ctx.save();
-    ctx.fillStyle = "yellow";
+    //var ctx = this.ctx;
+    //ctx.save();
+    //ctx.fillStyle = "yellow";
     
     var x = this.marginLeft + this.x;
     var y = this.marginTop + this.y;
     
     var w = 10, h = 10;
     
-    ctx.fillRect(x/2,y/2, w,h);  // top left
-   
-    ctx.fillRect(x + this.iw - w/2, y-h/2, w,h); // top right
+    this.anchors = [];
     
-    ctx.fillRect(x-w/2, y + this.ih-h/2, w,h);  // bottom left
+    this.anchors.push({ x: x-w/2, y: y-h/2, w: w, h:h}); //tl
+    this.anchors.push({ x: x + this.iw - w/2, y: y-h/2, w: w, h:h}); //tr
+    this.anchors.push({ x: x-w/2, y:  y + this.ih-h/2, w: w, h:h}); //bl
+    this.anchors.push({ x: x + this.iw-w/2, y: y + this.ih-h/2, w: w, h:h}); //br
+       
+    //ctx.fillRect(x-w/2,y-h/2, w,h);  // top left
+    //ctx.fillRect(x + this.iw - w/2, y-h/2, w,h); // top right
+    //ctx.fillRect(x-w/2, y + this.ih-h/2, w,h);  // bottom left
+    //ctx.fillRect(x + this.iw-w/2, y + this.ih-h/2, w,h); // bottom right
     
-    ctx.fillRect(x + this.iw-w/2, y + this.ih-h/2, w,h); // bottom right
+    //ctx.restore();
+};
+
+ImageEditor.prototype.drawAnchors = function(){
+    this.makeResizable();
+    var ctx = this.ctx;
+    ctx.save();
+    ctx.fillStyle = "yellow";
     
+    var a;
+    for(var i = 0; i < this.anchors.length; i++){
+        a = this.anchors[i];
+        ctx.fillRect(a.x,a.y, a.w,a.h);  // top left
+    }
     ctx.restore();
+
 };
 
 
