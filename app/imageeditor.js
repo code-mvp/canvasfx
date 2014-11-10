@@ -21,24 +21,24 @@ var ImageEditor = function (canvasId){
         
        // var selector  = utils.containsPoint(me.selector.getRect(), me.mouse.x, me.mouse.y);
         
-        me.selector.selected = true;
-        me.selector.x = me.mouse.x;
-        me.selector.y = me.mouse.y;
+        if (!me.selector.select) {
+            me.selector.select = true;
+            me.selector.x = me.mouse.x;
+            me.selector.y = me.mouse.y;
+        }else{
+            me.selector.move = true;
+        }
         
     }
     
     function onMouseUp(e){
-        if (me.mousedown && me.selector.selected){
-            me.selector.selected = false;
-        }
+        
         me.mousedown = false;
         
     }
     
     function onMouseMove(e){
-        if (me.mousedown && me.selector.selected){
-            
-        }
+       
     }
 };
 
@@ -56,9 +56,16 @@ ImageEditor.prototype.render = function(){
     img.onload =  function(){
        ctx.drawImage(img, 0, 0);
        
-       if (me.mousedown && me.selector) {
-         me.selector.x1 = me.mouse.x; //- me.selector.width/2;
-         me.selector.y1 = me.mouse.y; // - me.selector.height/2;
+       if (me.mousedown && me.selector.select && !me.selector.move) {
+         me.selector.mode = "select";
+         me.selector.x1 = me.mouse.x; 
+         me.selector.y1 = me.mouse.y; 
+       }
+       else if (me.mousedown && me.selector.move){   // if selector already drawn
+         me.selector.mode = "move";
+         me.selector.x = me.mouse.x - me.selector.width/2;
+         me.selector.y = me.mouse.y  - me.selector.height/2;
+           
        }
        me.selector.render(ctx);
 
