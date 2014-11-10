@@ -52,7 +52,7 @@ ImageEditor.prototype.setMode = function(mode){     // mode: crop, resize
 ImageEditor.prototype.render = function(){
     var me = this;
     ctx = canvas.getContext('2d');
-    var img = new Image();
+    img = new Image();  // todo: warning, global needs to be rectified.
     img.onload =  function(){
        ctx.drawImage(img, 0, 0);
        
@@ -72,6 +72,15 @@ ImageEditor.prototype.render = function(){
     };
     
     img.src = this.imgSrc;
+    
+};
+
+ImageEditor.prototype.crop = function(targetId){
+    var can2 = document.getElementById(targetId);
+    var ctx2 = can2.getContext('2d');
+    
+    var crop = this.selector;
+    ctx2.drawImage(img, crop.x, crop.y, crop.width, crop.height, 0,0, crop.width, crop.height);
     
 };
 

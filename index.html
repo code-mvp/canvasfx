@@ -15,15 +15,16 @@
   </head>
   <body>
       <div class="toolbar">
-        <span><button type="button">Zoom</button></span>
-        <span><button type="button">Crop</button></span>
-        <span><button type="button">Resize</button></span>
-          
+        <span><button type="button" id="crop">Crop</button></span>
       </div>
       
       
       <canvas id="canvas" width="500" height="500" 
               style="background-image1:URL('/images/vegetables.jpg')">
+        Please get a better browser.  Anything latest of chrome, firefox, ie should work.
+      </canvas>
+      
+      <canvas id="target" width="500" height="500" >
         Please get a better browser.  Anything latest of chrome, firefox, ie should work.
       </canvas>
       
@@ -34,7 +35,7 @@
       
       
       <script>
-         var imageEditor = new ImageEditor("canvas");
+         imageEditor = new ImageEditor("canvas");   // made global so that other methods can access it.
          imageEditor.imgSrc = "/images/vegetables.jpg"; 
           
          imageEditor.setMode("crop");
@@ -49,6 +50,13 @@
             imageEditor.render();
           }());
           
+      </script>
+      
+      <script>
+        $("#crop").on("click", function(e){
+            imageEditor.crop("target");
+            
+        });
       </script>
   </body>
 </html>
