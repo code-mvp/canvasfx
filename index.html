@@ -15,91 +15,40 @@
   </head>
   <body>
       <div class="toolbar">
-      
+        <span><button type="button">Zoom</button></span>
+        <span><button type="button">Crop</button></span>
+        <span><button type="button">Resize</button></span>
+          
       </div>
       
-      <img id="img" src="images/vegetables.jpg" style="display:none">
       
       <canvas id="canvas" width="500" height="500" 
-              style="background-image:URL('/images/vegetables.jpg')">
+              style="background-image1:URL('/images/vegetables.jpg')">
         Please get a better browser.  Anything latest of chrome, firefox, ie should work.
       </canvas>
       
-      <canvas id="canvas2" width="500" height="500" >
       
-      </canvas>
+
+      
+      <script src="app/selector.js"></script>
+      <script src="app/utils.js"></script>
+      <script src="app/imageeditor.js"></script>
       
       
       <script>
-      
-          var started = false;
-          var x = 100, y = 100, w = 30, h = 30;
+         var imageEditor = new ImageEditor("canvas");
+         imageEditor.imgSrc = "/images/vegetables.jpg"; 
           
-          function init(){
-            canvas = document.getElementById("canvas");
-            ctx = canvas.getContext('2d');
-              
-            canvas2 = document.getElementById("canvas2");
-            ctx2 = canvas2.getContext('2d');
-              
-            img = document.getElementById("img");
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            ctx.strokeRect(x - w/2, y-h/2, w, h);
-              
-            
-            canvas.addEventListener('mousemove', ev_move);
-            canvas.addEventListener('mousedown', ev_down);
-            canvas.addEventListener('mouseup', ev_up);
-            
-             
-          }
+         imageEditor.setMode("crop");
+         //imageEditor.render();
+
           
-          function ev_down(ev){
-            if (!ev) { ev = event;}
-            ev.preventDefault();
-              
-            xc = ev.layerX; yc = ev.layerY;
-              
-            if ((xc >= x-w/2) && (xc <= (x + w/2)) &&
-                (yc >= y - h/2) && (yc <= (y + h/2))){
-            
-                started = true;
-                ev_move();
-            }
-          }
-          
-          
-          function ev_move(ev){
-            if (!ev) { ev = event;}
-            ev.preventDefault();
-              
-            if (started){
-                xc = ev.layerX; 
-                yc = ev.layerY;
-                
-            }
-            else{
-                return;  
-            }
-              
-            x = xc;
-            y = yc;
-              
-            canvas.width = canvas.width;
-              
-            ctx.strokeRect(x - w/2, y - h/2, w, h);
-              
-            ctx2.drawImage(img, x, y, w, h, 0,0, canvas2.width, canvas2.height);
-              
-          }
-          
-          function ev_up(ev){
-            started = false;
-          }
-          
-          
-          init();
-          
+         (function drawFrame () {
+            window.requestAnimationFrame(drawFrame, canvas);
+            //context.clearRect(0, 0, canvas.width, canvas.height);
+
+            imageEditor.render();
+          }());
           
       </script>
   </body>
