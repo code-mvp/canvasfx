@@ -17,25 +17,26 @@ var ImageEditor = function (canvasId){
     }
     
     function onMouseDown(e){
-        console.log("Mouse: ",me.mouse);
+        me.mousedown = true;
         
-        var selector  = utils.containsPoint(me.selector, me.mouse.x, me.mouse.y);
-        if (selector){
-            me.selector.selected = true;
-            console.log("down");
-        }
+       // var selector  = utils.containsPoint(me.selector.getRect(), me.mouse.x, me.mouse.y);
+        
+        me.selector.selected = true;
+        me.selector.x = me.mouse.x;
+        me.selector.y = me.mouse.y;
         
     }
     
     function onMouseUp(e){
-        if (me.selector.selected){
+        if (me.mousedown && me.selector.selected){
             me.selector.selected = false;
         }
+        me.mousedown = false;
         
     }
     
     function onMouseMove(e){
-        if (me.selector.selected){
+        if (me.mousedown && me.selector.selected){
             
         }
     }
@@ -55,11 +56,12 @@ ImageEditor.prototype.render = function(){
     img.onload =  function(){
        ctx.drawImage(img, 0, 0);
        
-       me.selector.x = me.mouse.x - me.selector.width/2;
-       me.selector.y = me.mouse.y - me.selector.height/2;
-        
+       if (me.mousedown && me.selector) {
+         me.selector.x1 = me.mouse.x; //- me.selector.width/2;
+         me.selector.y1 = me.mouse.y; // - me.selector.height/2;
+       }
        me.selector.render(ctx);
-    
+
     };
     
     img.src = this.imgSrc;
