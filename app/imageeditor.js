@@ -2,8 +2,16 @@ var ImageEditor = function (canvasId){
     this.canvas = document.getElementById(canvasId);
     this.mode = "crop"; 
     this.imgSrc = "";
+    this.marginLeft = 20;
+    this.marginTop = 20;
+    this.x = 0;
+    this.y = 0;
+    this.iw = 0;
+    this.ih = 0;
     
+    this.anchors = {};  // holds four corners
     
+    this.ctx = this.canvas.getContext('2d');
     this.mouse = utils.captureMouse(this.canvas);
     
     var me = this;
@@ -51,10 +59,17 @@ ImageEditor.prototype.setMode = function(mode){     // mode: crop, resize
 
 ImageEditor.prototype.render = function(){
     var me = this;
-    ctx = canvas.getContext('2d');
+    var ctx = this.ctx; //canvas.getContext('2d');
     img = new Image();  // todo: warning, global needs to be rectified.
     img.onload =  function(){
-       ctx.drawImage(img, 0, 0);
+       
+       me.iw = img.width;
+       me.ih = img.height;
+        
+       me.canvas.width = img.width + me.marginLeft*2;
+       me.canvas.height = img.height + me.marginTop*2
+       
+       ctx.drawImage(img, me.x + me.marginLeft, me.y + me.marginTop, img.width, img.height);
        
        if (me.mousedown && me.selector.select && !me.selector.move) {
          me.selector.mode = "select";
@@ -68,7 +83,7 @@ ImageEditor.prototype.render = function(){
            
        }
        me.selector.render(ctx);
-
+       me.makeResizable();
     };
     
     img.src = this.imgSrc;
@@ -84,5 +99,25 @@ ImageEditor.prototype.crop = function(targetId){
     
 };
 
+ImageEditor.prototype.makeResizable = function(){
+    var ctx = this.ctx;
+    ctx.save();
+    ctx.fillStyle = "yellow";
+    
+    var x = this.marginLeft + this.x;
+    var y = this.marginTop + this.y;
+    
+    var w = 10, h = 10;
+    
+    ctx.fillRect(x/2,y/2, w,h);  // top left
+   
+    ctx.fillRect(x + this.iw - w/2, y-h/2, w,h); // top right
+    
+    ctx.fillRect(x-w/2, y + this.ih-h/2, w,h);  // bottom left
+    
+    ctx.fillRect(x + this.iw-w/2, y + this.ih-h/2, w,h); // bottom right
+    
+    ctx.restore();
+};
 
 
