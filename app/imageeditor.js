@@ -6,14 +6,18 @@ var ImageEditor = function (canvasId){
     this.canvas = document.getElementById(canvasId);
     this.mode = "crop";     // todo: refactor hardcoded
     this.imgSrc = "";
-    this.marginLeft = 20;
-    this.marginTop = 20;
+    this.marginLeft = 0;
+    this.marginTop = 0;
     this.x = 0;     // image x
     this.y = 0;     // image y
+   
+    
     this.iw = 0;    // image width
     this.ih = 0;    // image height
     
     this.anchors = [];  // holds four corners: tl, tr, bl, br
+    
+    this.selanchor = null;
     
     this.ctx = this.canvas.getContext('2d');
     this.mouse = utils.captureMouse(this.canvas);
@@ -40,14 +44,27 @@ var ImageEditor = function (canvasId){
         }else{
             me.selector.move = true;
         }
+        
+        for(var i = 0; i < me.anchors.length; i++){
+            var a = me.anchors[i];
+            
+            if (utils.containsPoint(a, me.mouse.x, me.mouse.y)){
+                me.selanchor = a;
+                break;
+            }
+            me.selanchor = null;
+        }
+        
+        console.log("Anchor: ", me.selanchor);
     }
     
     function onMouseUp(e){
         me.mousedown = false;
+        me.selanchor = null;
     }
     
     function onMouseMove(e){
-       
+       me.makeResizable();
     }
 };
 
@@ -60,50 +77,112 @@ ImageEditor.prototype.setMode = function(mode){     // mode: crop, resize
 ImageEditor.prototype.update = function(){
     var me = this;
     me.selector.update(me);
+    me.makeResizable();
+};
+
+ImageEditor.prototype.loadImage = function(src){
+    var me = this;
+    me.imgSrc = src;
+    
+    var img = new Image();  // todo: warning, global needs to be rectified.
+    
+    img.onload =  function(){
+        me.origImage = img;
+        console.log(img);
+    };
+    img.src = src;
 };
 
 ImageEditor.prototype.render = function(){
     var me = this;
     var ctx = this.ctx; //canvas.getContext('2d');
-    img = new Image();  // todo: warning, global needs to be rectified.
-    img.onload =  function(){
-       
-       me.iw = img.width;
-       me.ih = img.height;
-        
-       me.canvas.width = img.width + me.marginLeft*2;
-       me.canvas.height = img.height + me.marginTop*2
-       
-       ctx.drawImage(img, me.x + me.marginLeft, me.y + me.marginTop, img.width, img.height);
-      
-       me.selector.render(ctx);
-       me.drawAnchors();
-    };
+    var img = me.origImage;
     
-    img.src = this.imgSrc;
+    if (!img) return;
+       
+    me.iw = img.width;
+    me.ih = img.height;
+
+    me.canvas.width = img.width + me.marginLeft*2;
+    me.canvas.height = img.height + me.marginTop*2
+
+    me.x1 = me.x + me.width;
+    me.y1 = me.y + me.height;
+
+    if (me.selanchor){
+        if (me.selanchor.name == "tl"){
+          var timg = { x: me.x + me.marginLeft,
+                       y: me.y + me.marginTop,
+                       sw: img.width,
+                       sh: img.height,
+                       dx: me.mouse.x,
+                       dy: me.mouse.y,
+                       dw: (me.x + img.width)-me.mouse.x,
+                       dh: img.height
+                     };
+            
+          ctx.drawImage(img, me.x + me.marginLeft, me.y + me.marginTop, img.width, img.height, me.mouse.x, me.mouse.y, 
+                      (me.x + img.width)-me.mouse.x, img.height);
+            
+          me.timg = timg;
+        }
+    }
+    else{
+        if (me.timg){   // if transformed image is already there
+            var timg = me.timg;
+            ctx.drawImage(img,timg.x, timg.y, timg.sw, timg.sh, timg.dx, timg.dy, 
+                       timg.dw, timg.dh);
+            
+           // ctx.drawImage(img,timg.x, timg.y, timg.sw, timg.sh, 0, 0, 
+             //          timg.dw, timg.dh);
+            
+        }
+        else{
+             var timg = { x: me.x + me.marginLeft,
+                       y: me.y + me.marginTop,
+                       sw: img.width,
+                       sh: img.height,
+                     };
+            
+            ctx.drawImage(img, me.x + me.marginLeft, me.y + me.marginTop, img.width, img.height);
+        }
+        
+    }
+
+    me.selector.render(ctx);
+    me.drawAnchors();
 };
 
 ImageEditor.prototype.crop = function(targetId){
+    var me = this;
+    
+    // update new canvas
     var can2 = document.getElementById(targetId);
     var ctx2 = can2.getContext('2d');
     
     var crop = this.selector;
+    var img = me.origImage;
+    can2.width = crop.width;
+    can2.height = crop.height;
     ctx2.drawImage(img, crop.x, crop.y, crop.width, crop.height, 0,0, crop.width, crop.height);
+    
 };
 
 ImageEditor.prototype.makeResizable = function(){
     
-    var x = this.marginLeft + this.x;
-    var y = this.marginTop + this.y;
+    var that = this;
+    
+    var x = that.marginLeft + that.x;
+    var y = that.marginTop + that.y;
     
     var w = 15, h = 15;
     
     this.anchors = [];
     
-    this.anchors.push({ x: x-w/2, y: y-h/2, w: w, h:h}); //tl
-    this.anchors.push({ x: x + this.iw - w/2, y: y-h/2, w: w, h:h}); //tr
-    this.anchors.push({ x: x-w/2, y:  y + this.ih-h/2, w: w, h:h}); //bl
-    this.anchors.push({ x: x + this.iw-w/2, y: y + this.ih-h/2, w: w, h:h}); //br
+    this.anchors.push({ x: x-w/2, y: y-h/2, width: w, height:h,name:"tl"}); //tl
+    this.anchors.push({ x: x + that.iw - w/2, y: y-h/2, width: w, height:h,name:"tr"}); //tr
+    this.anchors.push({ x: x-w/2, y:  y + that.ih-h/2, width: w, height:h,name:"bl"}); //bl
+    this.anchors.push({ x: x + that.iw-w/2, y: y + that.ih-h/2, width: w, height:h,name:"br"}); //br
 };
 
 ImageEditor.prototype.drawAnchors = function(){
@@ -115,7 +194,7 @@ ImageEditor.prototype.drawAnchors = function(){
     var a;
     for(var i = 0; i < this.anchors.length; i++){
         a = this.anchors[i];
-        ctx.fillRect(a.x,a.y, a.w,a.h);  // top left
+        ctx.fillRect(a.x,a.y, a.width,a.height);  // top left
     }
     ctx.restore();
 };

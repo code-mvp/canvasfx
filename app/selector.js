@@ -25,7 +25,6 @@ Selector.prototype.render = function(ctx){
     if (this.visible){
         ctx.save();
         ctx.strokeStyle = "yellow";
-        console.log("crop render...", this.mode);
         if (this.mode == "select"){
             ctx.strokeRect(this.x, this.y, this.getRect().width, this.getRect().height);
         }else if (this.mode == "move") {

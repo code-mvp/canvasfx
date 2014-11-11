@@ -16,6 +16,8 @@
   <body>
       <div class="toolbar">
         <span><button type="button" id="crop">Crop</button></span>
+        <span><button type="button" id="reset">Reset</button></span>
+        <span><button type="button" id="save">Save</button></span>
       </div>
       
       
@@ -36,8 +38,8 @@
       
       <script>
          imageEditor = new ImageEditor("canvas");   // made global so that other methods can access it.
-         imageEditor.imgSrc = "/images/vegetables.jpg"; 
-          
+         //imageEditor.imgSrc = "/images/vegetables.jpg"; 
+         imageEditor.loadImage("/images/vegetables.jpg"); 
          imageEditor.setMode("crop");
          imageEditor.makeResizable();
           
@@ -54,6 +56,15 @@
         $("#crop").on("click", function(e){
             imageEditor.crop("target");
             
+        });
+          
+        $("#reset").on("click", function(e){
+            imageEditor.timg = null;
+        });
+          
+         $("#save").on("click", function(e){
+            var dataUrl = canvas.toDataURL();
+            window.open(dataUrl, "toDataURL() image", "width=600, height=200");
         });
       </script>
   </body>
