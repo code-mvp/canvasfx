@@ -1,12 +1,12 @@
 var Selector = function (type){
     console.log("create seletor: ", type);
     this.type = type || "crop"; // crop, resize
-    this.x = 0;
-    this.y = 0;
-    this.x1 = 0;
-    this.y1 = 0;
-    this.width = 0;
-    this.height = 0;
+    this.x = 20;
+    this.y = 20;
+    this.x1 = 40;
+    this.y1 = 40;
+    this.width = 20;
+    this.height = 20;
     this.mode = "select"; // select, move
 };
 
@@ -22,13 +22,28 @@ Selector.prototype.getRect = function(){
 };
 
 Selector.prototype.render = function(ctx){
-    ctx.save();
-    ctx.strokeStyle = "yellow";
-    
-    if (this.mode == "select"){
-        ctx.strokeRect(this.x, this.y, this.getRect().width, this.getRect().height);
-    }else if (this.mode == "move") {
-        ctx.strokeRect(this.x, this.y, this.width, this.height);
+    if (this.visible){
+        ctx.save();
+        ctx.strokeStyle = "yellow";
+        console.log("crop render...", this.mode);
+        if (this.mode == "select"){
+            ctx.strokeRect(this.x, this.y, this.getRect().width, this.getRect().height);
+        }else if (this.mode == "move") {
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
+        ctx.restore();
     }
-    ctx.restore();
+};
+
+Selector.prototype.update = function(me){
+  if (me.mousedown && this.select && !this.move) {
+      this.mode = "select";
+      this.x1 = me.mouse.x; 
+      this.y1 = me.mouse.y; 
+    }
+    else if (me.mousedown && this.move){   // if selector already drawn
+      this.mode = "move";
+      this.x = me.mouse.x - this.width/2;
+      this.y = me.mouse.y  - this.height/2;
+    }
 };
