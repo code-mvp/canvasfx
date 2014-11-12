@@ -35,8 +35,6 @@ var ImageEditor = function (canvasId){
     function onMouseDown(e){
         me.mousedown = true;
         
-       // var selector  = utils.containsPoint(me.selector.getRect(), me.mouse.x, me.mouse.y);
-        
         if (!me.selector.select) {
             me.selector.select = true;
             me.selector.x = me.mouse.x;
@@ -47,15 +45,12 @@ var ImageEditor = function (canvasId){
         
         for(var i = 0; i < me.anchors.length; i++){
             var a = me.anchors[i];
-            
             if (utils.containsPoint(a, me.mouse.x, me.mouse.y)){
                 me.selanchor = a;
                 break;
             }
             me.selanchor = null;
         }
-        
-        console.log("Anchor: ", me.selanchor);
     }
     
     function onMouseUp(e){
@@ -109,48 +104,18 @@ ImageEditor.prototype.render = function(){
     me.x1 = me.x + me.width;
     me.y1 = me.y + me.height;
 
-    if (me.selanchor){
-        if (me.selanchor.name == "tl"){
-          var timg = { x: me.x + me.marginLeft,
-                       y: me.y + me.marginTop,
-                       sw: img.width,
-                       sh: img.height,
-                       dx: me.mouse.x,
-                       dy: me.mouse.y,
-                       dw: (me.x + img.width)-me.mouse.x,
-                       dh: img.height
-                     };
-            
-          ctx.drawImage(img, me.x + me.marginLeft, me.y + me.marginTop, img.width, img.height, me.mouse.x, me.mouse.y, 
-                      (me.x + img.width)-me.mouse.x, img.height);
-            
-          me.timg = timg;
-        }
-    }
-    else{
-        if (me.timg){   // if transformed image is already there
-            var timg = me.timg;
-            ctx.drawImage(img,timg.x, timg.y, timg.sw, timg.sh, timg.dx, timg.dy, 
-                       timg.dw, timg.dh);
-            
-           // ctx.drawImage(img,timg.x, timg.y, timg.sw, timg.sh, 0, 0, 
-             //          timg.dw, timg.dh);
-            
-        }
-        else{
-             var timg = { x: me.x + me.marginLeft,
-                       y: me.y + me.marginTop,
-                       sw: img.width,
-                       sh: img.height,
-                     };
-            
-            ctx.drawImage(img, me.x + me.marginLeft, me.y + me.marginTop, img.width, img.height);
-        }
-        
-    }
+    
+     var timg = { 
+       x: me.x + me.marginLeft,
+       y: me.y + me.marginTop,
+       sw: img.width,
+       sh: img.height,
+     };
+
+    ctx.drawImage(img, me.x + me.marginLeft, me.y + me.marginTop, img.width, img.height);
 
     me.selector.render(ctx);
-    me.drawAnchors();
+    //me.drawAnchors();
 };
 
 ImageEditor.prototype.crop = function(targetId){
