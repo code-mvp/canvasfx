@@ -2,7 +2,7 @@
 *  Stage: Experimental
 *
 */
-var ImageEditor = function (canvasId){
+var ImageEditor = function (canvasId, width, height){
     this.canvas = document.getElementById(canvasId);
     this.mode = "crop";     // todo: refactor hardcoded
     this.imgSrc = "";
@@ -12,8 +12,8 @@ var ImageEditor = function (canvasId){
     this.y = 0;     // image y
    
     
-    this.iw = 0;    // image width
-    this.ih = 0;    // image height
+    this.iw = width || 200;    // image width
+    this.ih = height || 200;    // image height
     
     this.anchors = [];  // holds four corners: tl, tr, bl, br
     
@@ -82,7 +82,32 @@ ImageEditor.prototype.loadImage = function(src){
     var img = new Image();  // todo: warning, global needs to be rectified.
     
     img.onload =  function(){
-        me.origImage = img;
+         // begin
+        var maxWidth = me.iw; // Max width for the image
+        var maxHeight = me.ih;    // Max height for the image
+        var ratio = 0;  // Used for aspect ratio
+        var width = this.width;    // Current image width
+        var height = this.height;  // Current image height
+
+        // Check if the current width is larger than the max
+        if(width > maxWidth){
+            ratio = maxWidth / width;   // get ratio for scaling image
+            this.width = maxWidth;
+            this.height = height * ratio;
+            height = height * ratio;    // Reset height to match scaled image
+            width = width * ratio;    // Reset width to match scaled image
+        }
+
+        // Check if current height is larger than max
+        if(height > maxHeight){
+            ratio = maxHeight / height; // get ratio for scaling image
+            this.height= maxHeight;
+            this.width = width * ratio;
+            width = width * ratio;    // Reset width to match scaled image
+        }
+        //--> end
+
+        me.origImage = this;
         console.log(img);
     };
     img.src = src;
@@ -97,12 +122,13 @@ ImageEditor.prototype.render = function(){
        
     me.iw = img.width;
     me.ih = img.height;
+    
+   
+    //me.canvas.width = img.width + me.marginLeft*2;
+    //me.canvas.height = img.height + me.marginTop*2
 
-    me.canvas.width = img.width + me.marginLeft*2;
-    me.canvas.height = img.height + me.marginTop*2
-
-    me.x1 = me.x + me.width;
-    me.y1 = me.y + me.height;
+    me.x1 = 0;//me.x + me.width;
+    me.y1 = 0;//me.y + me.height;
 
     
      var timg = { 
@@ -112,8 +138,8 @@ ImageEditor.prototype.render = function(){
        sh: img.height,
      };
 
-    ctx.drawImage(img, me.x + me.marginLeft, me.y + me.marginTop, img.width, img.height);
-
+    //ctx.drawImage(img, me.x + me.marginLeft, me.y + me.marginTop, img.width, img.height);
+    ctx.drawImage(img, 0, 0, img.width, img.height);
     me.selector.render(ctx);
     //me.drawAnchors();
 };
@@ -129,7 +155,8 @@ ImageEditor.prototype.crop = function(targetId){
     var img = me.origImage;
     can2.width = crop.width;
     can2.height = crop.height;
-    ctx2.drawImage(img, crop.x, crop.y, crop.width, crop.height, 0,0, crop.width, crop.height);
+    //ctx2.drawImage(img, crop.x, crop.y, crop.width, crop.height, 0,0, crop.width, crop.height);
+    ctx2.drawImage(me.canvas, crop.x, crop.y, crop.width, crop.height, 0,0, crop.width, crop.height);
     
 };
 
