@@ -192,20 +192,27 @@ ImageEditor.prototype.drawAnchors = function(){
 };
 
 
-ImageEditor.prototype.getPixels = function(img) {
+ImageEditor.prototype.getPixels = function() {
   return this.ctx.getImageData(0,0,this.canvas.width,this.canvas.height);
 };
 
-ImageEditor.prototype.filterImage = function(filter, image, var_args) {
+ImageEditor.prototype.runFilter = function(filter, arg1, arg2, arg3) {
   var self = this;
-  var args = [this.getPixels(image)];
-  for (var i=2; i<arguments.length; i++) {
+  var idata = self.filterImage(filter, arg1, arg2, arg3);
+  //var ctx = c.getContext('2d');
+  //ctx.putImageData(idata, 0, 0);
+}
+
+ImageEditor.prototype.filterImage = function(filter, var_args) {
+  var self = this;
+  var args = [this.getPixels()];
+  for (var i=1; i<arguments.length; i++) {
     args.push(arguments[i]);
   }
   return filter.apply(self, args);
 };
 
-ImageEditor.prototype.grayscale = function(pixels, args) {
+ImageEditor.prototype.grayscale = function(pixels) {
   var self = this;
     
   var d = pixels.data;
@@ -226,5 +233,41 @@ ImageEditor.prototype.grayscale = function(pixels, args) {
   ctx2.putImageData(pixels, 0, 0);
   
     
+  return pixels;
+};
+
+ImageEditor.prototype.thresshold = function(pixels, threshold) {
+  var self = this;
+  var d = pixels.data;
+  for (var i=0; i<d.length; i+=4) {
+    var r = d[i];
+    var g = d[i+1];
+    var b = d[i+2];
+    var v = (0.2126*r + 0.7152*g + 0.0722*b >= threshold) ? 255 : 0;
+    d[i] = d[i+1] = d[i+2] = v
+  }
+  var can2 = document.getElementById("target"); // TODO: remove hardcode
+  var ctx2 = can2.getContext('2d');
+  
+  ctx2.clearRect(0, 0, self.canvas.width, self.canvas.height);
+  ctx2.putImageData(pixels, 0, 0);
+    
+  return pixels;
+};
+
+
+ImageEditor.prototype.brightness = function(pixels, adjustment) {
+  var d = pixels.data;
+  for (var i=0; i<d.length; i+=4) {
+    d[i] += adjustment;
+    d[i+1] += adjustment;
+    d[i+2] += adjustment;
+  }
+    
+  var can2 = document.getElementById("target"); // TODO: remove hardcode
+  var ctx2 = can2.getContext('2d');
+  
+  ctx2.clearRect(0, 0, self.canvas.width, self.canvas.height);
+  ctx2.putImageData(pixels, 0, 0);
   return pixels;
 };
