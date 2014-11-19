@@ -16,6 +16,7 @@
   <body>
       <div class="toolbar">
         <span><button type="button" id="crop">Crop</button></span>
+        <span><button type="button" id="grayScale">Make Gray Scale</button></span>
         <span><button type="button" id="reset">Reset</button></span>
         <span><button type="button" id="save">Save</button></span>
       </div>
@@ -55,6 +56,10 @@
       <script>
         $("#crop").on("click", function(e){
             imageEditor.crop("target");
+        });
+          
+        $("#grayScale").on("click", function(e){
+            imageEditor.filterImage(imageEditor.grayscale);
         });
           
         $("#reset").on("click", function(e){

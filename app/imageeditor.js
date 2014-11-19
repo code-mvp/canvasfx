@@ -192,3 +192,39 @@ ImageEditor.prototype.drawAnchors = function(){
 };
 
 
+ImageEditor.prototype.getPixels = function(img) {
+  return this.ctx.getImageData(0,0,this.canvas.width,this.canvas.height);
+};
+
+ImageEditor.prototype.filterImage = function(filter, image, var_args) {
+  var self = this;
+  var args = [this.getPixels(image)];
+  for (var i=2; i<arguments.length; i++) {
+    args.push(arguments[i]);
+  }
+  return filter.apply(self, args);
+};
+
+ImageEditor.prototype.grayscale = function(pixels, args) {
+  var self = this;
+    
+  var d = pixels.data;
+  for (var i=0; i<d.length; i+=4) {
+    var r = d[i];
+    var g = d[i+1];
+    var b = d[i+2];
+    // CIE luminance for the RGB
+    // The human eye is bad at seeing red and blue, so we de-emphasize them.
+    var v = 0.2126*r + 0.7152*g + 0.0722*b;
+    d[i] = d[i+1] = d[i+2] = v
+  }
+    
+  var can2 = document.getElementById("target"); // TODO: remove hardcode
+  var ctx2 = can2.getContext('2d');
+  
+  ctx2.clearRect(0, 0, self.canvas.width, self.canvas.height);
+  ctx2.putImageData(pixels, 0, 0);
+  
+    
+  return pixels;
+};
