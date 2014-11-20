@@ -18,6 +18,7 @@
         <span><button type="button" id="crop">Crop</button></span>
         <span><button type="button" id="grayScale">Make Gray Scale</button></span>
          <span><button type="button" id="brighten">Brighten</button></span>
+          <span><button type="button" id="thresshold">Threshold</button></span>
         <span><button type="button" id="reset">Reset</button></span>
         <span><button type="button" id="save">Save</button></span>
       </div>
@@ -66,6 +67,11 @@
           
         $("#brighten").on("click", function(e){
             imageEditor.runFilter(imageEditor.brightness,40);
+        });
+          
+             
+        $("#thresshold").on("click", function(e){
+            imageEditor.runFilter(imageEditor.thresshold,128);
         });
           
         $("#reset").on("click", function(e){
